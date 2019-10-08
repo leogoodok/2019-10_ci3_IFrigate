@@ -1,0 +1,24 @@
+@charset "utf-8";
+/** CSS. Добавление шрифта иконок "Glyphicons Halflings"
+ * Пример использования иконок, код HTML:
+ * <span class="text-font-glyphicons-halflings">&#xE209;</span>
+ * Использование: Текст + иконка.
+ * См. в файле "icon-fonts-GlyphiconsHalflings.css"
+ */
+
+
+@font-face {
+  font-family: 'Glyphicons Halflings';
+  src: url('../../fonts/glyphicons-halflings-regular.eot') format('embedded-opentype'),
+  url('../../fonts/glyphicons-halflings-regular.woff2') format('woff2'),
+  url('../../fonts/glyphicons-halflings-regular.woff') format('woff'),
+  url('../../fonts/glyphicons-halflings-regular.ttf') format('truetype'),
+  url('../../fonts/glyphicons-halflings-regular.svg') format('svg');
+  font-weight: normal;
+  font-weight: normal;
+}
+.text-font-glyphicons-halflings {
+  font-family: 'Glyphicons Halflings';
+  font-style: normal;
+  font-weight: normal;
+}
