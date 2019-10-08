@@ -2,9 +2,9 @@
 
 Размещено:
 
-Frontend - http://yii2aifrigate.wotskill.ru/
+Frontend - http://ci3ifrigate.wotskill.ru/
 
-Backend  - http://yii2aifrigate.wotskill.ru/admin/
+Backend  - http://ci3ifrigate.wotskill.ru/admin/
 
 Ход выполнения см. в README_GitHub.md
 

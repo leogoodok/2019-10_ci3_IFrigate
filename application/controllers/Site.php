@@ -33,7 +33,7 @@ class Site extends CI_Controller {
       ],
       'footer' => [
         'class' => 'bg-dark',
-        'link_github' => 'https://github.com/leogoodok',
+        'link_github' => 'https://github.com/leogoodok/ci3_IFrigate',
       ],
     ];
 
