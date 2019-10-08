@@ -10,13 +10,16 @@
   - Разместить в "~\system\language\russian\"
 
 
-### Создание приложения CI3 для FRONTEND части приложения
+### Создание приложения CI3 для FRONTEND части сайта
 
 #### Перенос файлов Фреймворка из WEB доступной директории
 
 1. Создание WEB доступной директории "~\docs"
-2. Перемещение "Входного скрипта" (~\index.php) в WEB доступную директорию,
-  новый путь "~\docs\index.php"
+2. Перемещение "Входного скрипта" (index.php) в WEB доступную директорию
+  - новый путь:
+```
+  "~\docs\index.php"
+```
 3. Настройки путей к папкам Фреймворка в файле "~\docs\index.php".
   - Новый путь к папке SYSTEM:
 ```
@@ -26,16 +29,16 @@ $system_path = realpath(__DIR__.'/../system');
 ```
 $application_folder = realpath(__DIR__.'/../application');
 ```
-4. Добавление файла "~\docs\.htaccess"
-
-5. !Внимание. Перед публикацией (размещением) приложения переключить его
-  в режим "production", во входном скрипте страницы
+4. Добавление файла, с правилами переадресации, для скрытия из URL входного скрипта
+```
+~\docs\.htaccess
+```
+5. ! Внимание ! Перед публикацией (размещением) приложения на хостинге (сервере) не забыть переключить его в режим "production".
 ```
 // define('ENVIRONMENT', isset($_SERVER['CI_ENV']) ? $_SERVER['CI_ENV'] : 'development');
 define('ENVIRONMENT', 'production');
 ```
-
-6. Примечание. Можно удалить файлы "index.html" из всех директорий Приложения, так как диступ из WEB к этим папкам невозможен.
+6. Примечание. Можно удалить файлы "index.html" из всех директорий Приложения, так как доступ из WEB к этим папкам теперь невозможен.
 
 #### Настройка Фреймворка
 
@@ -47,7 +50,7 @@ $path = '';
 $config['base_url'] = "$protocol://{$_SERVER['HTTP_HOST']}/$path";
 unset($protocol,$path);
 ```
-  - Удаление префикса пользовательских классов. Использовать пространства имен!
+  - Не обязательно. Удаление префикса пользовательских классов. Использовать пространства имен!
 ```
 $config['subclass_prefix'] = '';
 ```
@@ -61,7 +64,7 @@ $config['csrf_protection'] = TRUE;
 ```
   - Изменение Языка по умолчанию
 ```
-$config['language']	= 'russian';
+$config['language'] = 'russian';
 ```
 
 2. Редактирование настроек подключения к БД в файле "~\application\config\database.php".
@@ -74,12 +77,15 @@ $autoload['libraries'] = ['session', 'database', 'email'];
 4. Настройка отправки Email. Создан файл с настройками "~\application\config\email.php"
 
 
-### Создание второго приложения CI3, для BACKEND части приложения
+### Создание второго приложения CI3, для BACKEND части сайта
 
 #### Копирование файлов приложения
 
-1. Создание в "~\application\" папки "~\application\admin\".
-  Копирование в неё папок (со всем содержимым) из первого приложения "application".
+1. Создание в папке приложения "~\application\" нового каталога второго приложения.
+```
+"~\application\admin\"
+```
+- Копирование в неё папок (со всем содержимым) из первого приложения "~\application\".
 ```
 ~\application\admin\cache
 ~\application\admin\config
@@ -89,9 +95,8 @@ $autoload['libraries'] = ['session', 'database', 'email'];
 ~\application\admin\models
 ~\application\admin\views
 ```
-
-2. Создание в "~\docs\" папки "~\docs\admin\".
-  Копирование в неё папок (со всем содержимым) из первого приложения "docs".
+2. Создание в WEB доступной директории папки "~\docs\admin\".
+  - Копирование в неё файлов из первого приложения "docs".
 ```
 ~\docs\admin\index.php
 ~\docs\admin\.htaccess
@@ -109,15 +114,12 @@ $system_path = realpath(__DIR__.'/../../system');
 ```
 $application_folder = realpath(__DIR__.'/../../application/admin');
 ```
-
-2. !Внимание. Перед публикацией (размещением) приложения переключить его
-  в режим "production"
+2. ! Внимание ! Перед публикацией (размещением) приложения на хостинге (сервере) не забыть переключить его в режим "production".
 ```
 // define('ENVIRONMENT', isset($_SERVER['CI_ENV']) ? $_SERVER['CI_ENV'] : 'development');
 define('ENVIRONMENT', 'production');
 ```
-
-3. Примечание. Можно удалить файлы "index.html" из всех директорий Приложения, так как диступ из WEB к этим папкам невозможен.
+3. Примечание. Можно удалить файлы "index.html" из всех директорий Приложения, так как диступ из WEB к этим папкам теперь невозможен.
 
 #### Настройка Фреймворка
 
@@ -129,7 +131,7 @@ $path = 'admin/';
 $config['base_url'] = "$protocol://{$_SERVER['HTTP_HOST']}/$path";
 unset($protocol,$path);
 ```
-  - Удаление префикса пользовательских классов. Использовать пространства имен!
+  - Не обязательно. Удаление префикса пользовательских классов. Использовать пространства имен!
 ```
 $config['subclass_prefix'] = '';
 ```
@@ -139,7 +141,7 @@ $config['encryption_key'] = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx';
 ```
 - Изменение пути сокетов, для устранения конфликтов с FRONTEND частью
 ```
-$config['cookie_path']		= '/'.$path;
+$config['cookie_path'] = '/'.$path;
 ```
   - Включение защиты от Подделки межсайтовых запросов
 ```
@@ -171,33 +173,39 @@ $autoload['libraries'] = ['session', 'database'];
 ~\docs\js\main.js     - JS-скрипты "Основного шаблона страниц сайта"
 ```
 
-### Создание Контроллера "Site".
-    Размещено в файле "~\application\controllers\Site.php".
-
+### Создание Контроллера "Site"
+```
+Размещено в файле "~\application\controllers\Site.php"
+```
 1. Назначение контроллера по умолчанию в файле "~\application\config\routes.php".
 ```
 $route['default_controller'] = 'site';
 ```
-
-2. Создание Действия "index" - Формирует данные и . Выполняет функционал:
+2. Создание Действия "index" - Формирует данные. Выполняет функционал:
   - Валидации входных POST данных.
   - Сохранение сообщений пользователя в БД.
   - Отправляет сообщение администратору по Email.
-  - Рендерит страницу "Отправки сообщения администратору"
+  - Рендерит страницу "Отправки сообщения администратору".
 
-### Создание Класса (Модели) таблицы "message" БД.
-    Размещено в файле "~\application\models\db\TabMessage.php".
+### Создание Класса (Модели) таблицы БД "message"
+```
+~\application\models\db\TabMessage.php
+```
 
 ### Создание Представления (Вида)
 
 1. Создание папки шаблонов частей Представлений страниц.
-    Размещено "~\application\views\layouts\".
-
+```
+~\application\views\layouts\
+```
 2. Создание Основного шаблона всех страниц сайта.
-    Размещено в файле "~\application\views\layouts\main.php".
-
+```
+~\application\views\layouts\main.php
+```
 3. Создание Представления "Отправить сообщение администратору".
-    Размещено в файле "~\application\views\message.php".
+```
+~\application\views\message.php
+```
 
 
 ## Создание "BACKEND" части приложения
@@ -213,31 +221,35 @@ $route['default_controller'] = 'site';
 ```
 
 ### Создание Контроллера "Site".
-    Размещено в файле "~\application\admin\controllers\Site.php".
-
+```
+~\application\admin\controllers\Site.php
+```
 1. Назначение контроллера по умолчанию в файле "~\application\admin\config\routes.php".
 ```
 $route['default_controller'] = 'site';
 ```
+2. Создание Действия "index" - Формирует данные. Выполняет функционал:
+  - Валидации входных POST данных.
+  - Запись в БД изменений статуса сообщений пользователей.
+  - Удаляет из БД сообщений пользователей.
+  - Рендерит страницу "Сообщения администратору".
 
-2. Создание Действия "index" - ...
-
-### Создание Класса (Модели)...
-
-
-
+### Создавать Класс (Модель) таблицы БД "message" не надо, использовать Класс из FRONTEND
+```
+~\application\models\db\TabMessage.php
+```
 
 ### Создание Представления (Вида)
 
 1. Создание папки шаблонов частей Представлений страниц.
-    Размещено "~\application\admin\views\layouts\".
-
+```
+~\application\admin\views\layouts\
+```
 2. Создание Основного шаблона всех страниц сайта.
-    Размещено в файле "~\application\admin\views\layouts\main.php".
-
+```
+~\application\admin\views\layouts\main.php
+```
 3. Создание Представления "Сообщения администратору".
-    Размещено в файле "~\application\admin\views\message.php".
-
-
-
-...
+```
+~\application\admin\views\message.php
+```
