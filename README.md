@@ -33,8 +33,8 @@ JS файлы: ~\docs\admin\js\
 
 #### Представления: "~\application\views\"
 ```
-~\application\views\layouts\main.php – основной шаблон страниц \
-~\application\views\message.php – отправить сообщение администратору \
+~\application\views\layouts\main.php – основной шаблон страниц
+~\application\views\message.php – отправить сообщение администратору
 ```
 
 ### BACKEND часть

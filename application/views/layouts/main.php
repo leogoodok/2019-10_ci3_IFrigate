@@ -20,7 +20,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	<meta name="robots" content="index,follow" >
 	<title><?= $title ?></title>
 	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
-	<!-- <link href="<?= ''// $this->config->config['base_url'] ?>assets/bootstrap4/css/bootstrap.css" rel="stylesheet"> -->
+	<!-- <link href="<?= $this->config->config['base_url'] ?>assets/bootstrap4/css/bootstrap.css" rel="stylesheet"> -->
 	<link href="<?= $this->config->config['base_url'] ?>css/fonts.css" rel="stylesheet">
 	<link href="<?= $this->config->config['base_url'] ?>css/main.css" rel="stylesheet" type="text/css">
 </head>
@@ -73,6 +73,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	unset($alert);
 	?>
 
+	<div id="site-message-result_submit" class="d-none alert mb-1" role="alert">aaaaaaaaa</div>
 <?= $content['body'] ?>
 
 </div>
@@ -104,6 +105,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 <div id="butToTop">&#xE133;</div>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+<!-- <script src="<?= $this->config->config['base_url'] ?>assets/jquery/jquery.js" type="text/javascript"></script> -->
+<script src="<?= $this->config->config['base_url'] ?>assets/jquery/jquery.json.min.js" type="text/javascript"></script>
+<!-- <script src="<?= $this->config->config['base_url'] ?>assets/bootstrap4/js/bootstrap.js" type="text/javascript"></script> -->
+<!-- <script src="<?= $this->config->config['base_url'] ?>assets/bootstrap4/js/bootstrap.bundle.js" type="text/javascript"></script> -->
 <script src="<?= $this->config->config['base_url'] ?>js/main.js" type="text/javascript"></script>
 </body>
 </html>

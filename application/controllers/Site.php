@@ -2,6 +2,7 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Site extends CI_Controller {
+
   /**
   * Формирует данные и отображает страницу "Отправки сообщения администратору".
   * @return mixed
@@ -29,7 +30,10 @@ class Site extends CI_Controller {
       ],
       'content' => [
         'class' => 'container site-message',
-        'params' => [],
+        'params' => [
+          'min_length' => 3,
+          'max_length' => 100,
+        ],
       ],
       'footer' => [
         'class' => 'bg-dark',
@@ -73,7 +77,8 @@ class Site extends CI_Controller {
 
 
     /**
-     * Настройка и установка правил валидации
+     * Настройка и установка правил валидации.
+     * NOTE: Для отправки формы с перезагрузкой страницы.
      */
      $config_valid = [
        [
@@ -82,8 +87,8 @@ class Site extends CI_Controller {
          'rules' => [
            'trim',
            'required',
-           'min_length[3]',
-           'max_length[100]',
+           "min_length[{$main['content']['params']['min_length']}]",
+           "max_length[{$main['content']['params']['max_length']}]",
          ],
          'errors' => [
            'required' => 'Пожалуйста, заполните поле',
@@ -107,7 +112,7 @@ class Site extends CI_Controller {
          'rules' => [
            'trim',
            'required',
-           'min_length[3]',
+           "min_length[{$main['content']['params']['min_length']}]",
          ],
          'errors' => [
            'required' => 'Пожалуйста, заполните поле',
@@ -130,8 +135,9 @@ class Site extends CI_Controller {
 
     /**
      * Получение POST-данных. Валидация.
+     * NOTE: Для отправки формы с перезагрузкой страницы.
      */
-    if (($main['validation']['status'] = $this->form_validation->run()) == true) {
+    if (false && ($main['validation']['status'] = $this->form_validation->run()) == true) {
       /**
        * Создание экземпляра класса, его заполнение
        */
@@ -141,9 +147,6 @@ class Site extends CI_Controller {
       $tab_message->status = 1;
       $tab_message->name = $post['SiteMessageForm']['name'];
       $tab_message->email = $post['SiteMessageForm']['email'];
-      if (!empty($post['SiteMessageForm']['files'])) {
-        $tab_message->number_attachment = count($post['SiteMessageForm']['files']);//!!!! ?????????
-      }
       $tab_message->created_at = time();
 
 
@@ -187,5 +190,124 @@ class Site extends CI_Controller {
      */
     $main['content']['body'] = $this->load->view('message', $main, true);
     $this->load->view('layouts/main', $main);
+  }
+
+
+  /**
+  * Получение POST-параметров из JS AJAX. Валидация. Формирование и отправка ответа.
+  * @return json
+  * NOTE: Для отправки формы без перезагрузки страницы.
+   */
+  public function ajax()
+  {
+    /**
+     * Подключение библиотек
+     */
+    $this->load->helper(array('form', 'url'));
+    $this->load->library('form_validation');
+    $this->load->library('email');
+    //! Настройки 'email' в файле конфигурации "email.php"
+
+
+    /**
+     * Настройка и установка правил валидации
+     */
+     $config_valid = [
+       [
+         'field' => "SiteMessageForm[name]",
+         'label' => 'Ваше Имя',
+         'rules' => [
+           'trim',
+           'required',
+           "min_length[3]",
+           "max_length[100]",
+         ],
+         'errors' => [
+           'required' => '- "Ваше Имя"',
+         ],
+       ],
+       [
+         'field' => "SiteMessageForm[email]",
+         'label' => 'Email',
+         'rules' => [
+           'trim',
+           'required',
+           'valid_email',
+         ],
+         'errors' => [
+           'required' => '- "Email"',
+         ],
+       ],
+       [
+         'field' => "SiteMessageForm[subject]",
+         'label' => 'Тема сообщения',
+         'rules' => [
+           'trim',
+           'required',
+           "min_length[3]",
+         ],
+         'errors' => [
+           'required' => '- "Тема сообщения"',
+         ],
+       ],
+       [
+         'field' => "SiteMessageForm[body]",
+         'label' => 'Содержание сообщения',
+         'rules' => [
+           'trim',
+           'required',
+         ],
+         'errors' => [
+           'required' => '- "Содержание сообщения"',
+         ],
+       ],
+     ];
+     $this->form_validation->set_rules($config_valid);
+
+
+    /**
+     * Получение POST-данных. Валидация.
+     */
+    if ($this->form_validation->run() == true) {
+      /**
+       * Создание экземпляра класса, его заполнение
+       */
+      $post = $this->input->post();
+      load_class('TabMessage', 'models/db', '');
+      $tab_message = new TabMessage();
+      $tab_message->status = 1;
+      $tab_message->name = $post['SiteMessageForm']['name'];
+      $tab_message->email = $post['SiteMessageForm']['email'];
+      $tab_message->created_at = time();
+
+
+      /**
+       * Формирование сообщения администратору
+       */
+      $this->email->from('yii2advanced_noreply@wotskill.ru', 'WotSkill.ru email');
+      $this->email->to('yii2advanced_admin@wotskill.ru');
+      $this->email->reply_to($post['SiteMessageForm']['email'], $post['SiteMessageForm']['name']);
+      $this->email->subject($post['SiteMessageForm']['subject']);
+      $this->email->message(
+        '<h3>Здравствуйте,</h3>'
+        .$post['SiteMessageForm']['body']
+        .'<p style="font-weight: bold;">С уважением,</p>'
+        .'<p style="font-weight: bold;">'.$post['SiteMessageForm']['name'].'</p>'
+        .'<p>Email: '.$post['SiteMessageForm']['email'].'</p>'
+      );
+
+
+      /**
+       * Выполнение записи в БД и отправки Email сообщения
+       */
+      if ($this->db->insert(TabMessage::tableName(), $tab_message) && $this->email->send()) {
+        echo json_encode(['status' => 'ok', 'message' => 'Благодарим Вас за обращение к нам. Мы ответим вам как можно скорее.', 'errors' => validation_errors()]);
+      } else {
+        echo json_encode(['status' => 'error', 'message' => 'Произошла ошибка в процессе отправки сообщения.', 'errors' => validation_errors()]);
+      }
+      unset($post,$tab_message);
+    } else {
+      echo json_encode(['status' => 'error', 'message' => 'Пожалуйста, заполните обязательные поля:', 'errors' => validation_errors()]);
+    }
   }
 }
