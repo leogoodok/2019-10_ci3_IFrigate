@@ -23,6 +23,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	<!-- <link href="<?= $this->config->config['base_url'] ?>assets/bootstrap4/css/bootstrap.css" rel="stylesheet"> -->
 	<link href="<?= $this->config->config['base_url'] ?>css/fonts.css" rel="stylesheet">
 	<link href="<?= $this->config->config['base_url'] ?>css/main.css" rel="stylesheet" type="text/css">
+	<script src="https://www.google.com/recaptcha/api.js" async defer></script>
 </head>
 <body>
 <header<?= !empty($header['class']) ? " class=\"{$header['class']}\"" : '' ?>>
@@ -63,7 +64,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			foreach ($alert[$i] as $key => $msg):
 	?>
 
-	<div class="alert alert-<?= $key ?> mb-1" role="alert">
+	<div class="d-block alert alert-<?= $key ?> mb-1" role="alert">
 	  <?= $msg ?>
 
 	</div><?php
@@ -73,7 +74,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	unset($alert);
 	?>
 
-	<div id="site-message-result_submit" class="d-none alert mb-1" role="alert">aaaaaaaaa</div>
+	<div id="site-message-result_submit" class="alert mb-1" role="alert"></div>
 <?= $content['body'] ?>
 
 </div>
@@ -110,5 +111,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 <!-- <script src="<?= $this->config->config['base_url'] ?>assets/bootstrap4/js/bootstrap.js" type="text/javascript"></script> -->
 <!-- <script src="<?= $this->config->config['base_url'] ?>assets/bootstrap4/js/bootstrap.bundle.js" type="text/javascript"></script> -->
 <script src="<?= $this->config->config['base_url'] ?>js/main.js" type="text/javascript"></script>
+<script>jQuery('[data-toggle="tooltip"]').tooltip();</script>
 </body>
 </html>

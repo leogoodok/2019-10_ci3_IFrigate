@@ -66,7 +66,7 @@ jQuery(function($){
     /**
      *  Назначение обработчика события ввода символа в input "Ваше Имя*"
      */
-    jQuery('#site-message-form-name').on('input', function() {
+    $('#site-message-form-name').on('input', function() {
       var value = $(this).val();
 
       //Удаление не разрешенных символов
@@ -92,13 +92,14 @@ jQuery(function($){
     /**
      *  Назначение обработчика события потери фокуса input-а "Ваше Имя*"
      */
-    jQuery('#site-message-form-name').blur( function() {
+    $('#site-message-form-name').blur( function() {
       var value = $(this).val();
 
       //Скрытие панели оповещения, если она отображается
-      if (!($($(this).data('targetResult')).hasClass('d-none'))) {
-        $($(this).data('targetResult')).addClass('d-none');
+      if (!($($(this).data('targetResult')).css('none'))) {
+        $($(this).data('targetResult')).slideUp().html('');
       }
+
 
       //Валидация (не менее ... символов)
       if (value.length < $(this).data('min_length')) {
@@ -119,7 +120,7 @@ jQuery(function($){
     /**
      *  Назначение обработчика события ввода символа в input "Email*"
      */
-    jQuery('#site-message-form-email').on('input', function() {
+    $('#site-message-form-email').on('input', function() {
       var value = $(this).val();
 
       //Перевод с Русской раскладки клавиатуры в Английскую, если необходимо
@@ -140,13 +141,13 @@ jQuery(function($){
     /**
      *  Назначение обработчика события потери фокуса input-а "Email*"
      */
-    jQuery('#site-message-form-email').blur( function() {
+    $('#site-message-form-email').blur( function() {
       var re = /^[a-z0-9_\-\.]+@[a-z0-9\-]+\.([a-z]{1,6}\.)?[a-z]{2,6}$/i,
           value = $(this).val();
 
       //Скрытие панели оповещения, если она отображается
-      if (!($($(this).data('targetResult')).hasClass('d-none'))) {
-        $($(this).data('targetResult')).addClass('d-none');
+      if (!($($(this).data('targetResult')).css('none'))) {
+        $($(this).data('targetResult')).slideUp().html('');
       }
 
       //Валидация
@@ -170,7 +171,7 @@ jQuery(function($){
     /**
      *  Назначение обработчика события ввода символа в input "Тема сообщения*"
      */
-    jQuery('#site-message-form-subject').on('input', function() {
+    $('#site-message-form-subject').on('input', function() {
       var value = $(this).val();
 
       //Удаление не разрешенных символов
@@ -191,12 +192,12 @@ jQuery(function($){
     /**
      *  Назначение обработчика события потери фокуса input-а "Тема сообщения*"
      */
-    jQuery('#site-message-form-subject').blur( function() {
+    $('#site-message-form-subject').blur( function() {
       var value = $(this).val();
 
       //Скрытие панели оповещения, если она отображается
-      if (!($($(this).data('targetResult')).hasClass('d-none'))) {
-        $($(this).data('targetResult')).addClass('d-none');
+      if (!($($(this).data('targetResult')).css('none'))) {
+        $($(this).data('targetResult')).slideUp().html('');
       }
 
       //Валидация (не менее ... символов)
@@ -218,12 +219,12 @@ jQuery(function($){
     /**
      *  Назначение обработчика события потери фокуса textarea "Содержание сообщения*"
      */
-    jQuery('#site-message-form-body').blur( function() {
+    $('#site-message-form-body').blur( function() {
       var value = $(this).val();
 
       //Скрытие панели оповещения, если она отображается
-      if (!($($(this).data('targetResult')).hasClass('d-none'))) {
-        $($(this).data('targetResult')).addClass('d-none');
+      if (!($($(this).data('targetResult')).css('none'))) {
+        $($(this).data('targetResult')).slideUp().html('');
       }
 
       //Удаление "пробельных" символов
@@ -246,14 +247,14 @@ jQuery(function($){
     /**
      *  Назначение обработчика события клика кнопки "Отправить сообщение"
      */
-    jQuery('#site-message-form-button_submit').click( function() {
+    $('#site-message-form-button_submit').click( function() {
       var form = $(this).parents('form'),
-          form_params = {},
+//           form_params = {},
           valid_all = true;
 
       //Скрытие панели оповещения, если она отображается
-      if (!($($(this).data('targetResult')).hasClass('d-none'))) {
-        $($(this).data('targetResult')).addClass('d-none');
+      if (!($($(this).data('targetResult')).css('none'))) {
+        $($(this).data('targetResult')).slideUp().html('');
       }
 
       //Проверка выполнена ли валидация полей формы
@@ -264,6 +265,16 @@ jQuery(function($){
           $(this).blur();
         }
       });
+
+      //Проверка заполнения Капчи
+      var parent_captcha = form.find('div.g-recaptcha').parent();
+      if (!grecaptcha.getResponse()) {
+        valid_all = false;
+        parent_captcha.removeClass('is-valid').addClass('is-invalid');
+        $($(parent_captcha).data('targetError')).text('Пожалуйста, пройдите проверку');
+      } else {
+        parent_captcha.removeClass('is-invalid').addClass('is-valid');
+      }
       if (!valid_all) return;
 
       //Отправка формы с перезагрузкой страницы
@@ -274,6 +285,7 @@ jQuery(function($){
       var str_url = window.location.protocol + '//' + window.location.hostname + '/index.php/site/ajax/';
       $.post(
         str_url,
+        // form_params,
         form.serialize(),//Сериализация формы
         function(response) {
           var result = $.parseJSON(response),
@@ -289,15 +301,16 @@ jQuery(function($){
               $(this).val('');
             });
             $(target_form).find('input[type="file"]').val('');
+            grecaptcha.reset();
           } else {
             $(target_result).removeClass('alert-success').addClass('alert-danger').html("<h5>" + message + "</h5>\n" + errors);
             $(target_form).find('input[aria-required], textarea[aria-required]').each(function(i,elem) {
-                if ($(this).attr('aria-invalid')) {
-                  $(this).blur();
-                }
+              if ($(this).attr('aria-invalid')) {
+                $(this).blur();
+              }
             });
           }
-          $(target_result).removeClass('d-none');
+          $(target_result).slideDown();
         },
         'text'
       );

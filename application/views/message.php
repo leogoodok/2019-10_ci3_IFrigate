@@ -38,7 +38,17 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 					<div class="invalid-feedback" id="error-site-message-form-body"><?= form_error("SiteMessageForm[body]") ?></div>
 				</div>
 				<div class="form-group">
+					<input type="hidden" name="g-recaptcha-user-ip" value="<?= $_SERVER['REMOTE_ADDR'] ?>">
+					<div id="site-message-form-captcha" name="SiteMessageForm[captcha]" class="form-control-file<?= !empty(form_error("g-recaptcha-response")) ? ' is-invalid' : (isset($content['captcha']['is_valid']) ? ($content['captcha']['is_valid'] ? ' is-valid' : ' is-invalid') : '') ?>" data-target-error="#error-site-message-form-captcha" data-target-result="#site-message-result_submit">
+						<div class="g-recaptcha" data-sitekey="<?= $content['captcha']['public_key'] ?>"></div>
+					</div>
+					<div class="invalid-feedback" id="error-site-message-form-captcha"><?= !empty(form_error("g-recaptcha-response")) ? form_error("g-recaptcha-response") : $content['captcha']['error_msg'] ?></div>
+				</div>
+				<div class="form-group">
 					<button type="button" id="site-message-form-button_submit" class="btn btn-primary" data-target-result="#site-message-result_submit">Отправить сообщение</button>
+				</div>
+				<div class="form-group">
+					<button type="submit" id="site-message-form-button_submit_2" class="btn btn-primary" data-target-result="#site-message-result_submit">Отправить сообщение (с перезагрузкой страницы)</button>
 				</div>
 			</form>
 		</div>

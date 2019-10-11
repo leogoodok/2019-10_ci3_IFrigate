@@ -22,6 +22,9 @@
   min-height: calc(100vh - 8rem);
 }
 .site-message {}
+.site-message div.alert {
+  display:none;
+}
 .site-message .alert p {
   margin-bottom:0.25rem;
 }
