@@ -107,7 +107,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				</nav>
 			</div>
 		</div>
-		<div class="row justify-content-center mb-2">
+		<div class="row justify-content-center mb-3">
 			<div class="col-8">
 				<button type="submit" id="siteMessageAction-button_submit" class="btn btn-info btn-block">Сохранить изменения статусов сообщений и удалить выбранные сообщения</button>
 			</div>

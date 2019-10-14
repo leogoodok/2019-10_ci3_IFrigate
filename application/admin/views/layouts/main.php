@@ -20,6 +20,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	<meta name="robots" content="index,follow" >
 	<title><?= $title ?></title>
 	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+	<!-- <link href="<?= $this->config->config['base_url'] ?>assets/bootstrap4/css/bootstrap.css" rel="stylesheet"> -->
 	<link href="<?= $this->config->config['base_url'] ?>css/fonts.css" rel="stylesheet">
 	<link href="<?= $this->config->config['base_url'] ?>css/main.css" rel="stylesheet" type="text/css">
 </head>
@@ -35,13 +36,26 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				<ul class="navbar-nav ml-auto mt-2 mt-lg-0">
 					<li class="nav-item<?= $header['active_item'] == 'message' ? ' active' : '' ?>">
 						<a class="nav-link" href="<?= $this->config->config['base_url'] ?>site/index">Сообщения администратору<?= $header['active_item'] == 'message' ? '<span class="sr-only">(current)</span>' : '' ?></a>
-					</li>
+					</li><?php
+					if (isset($navbar['is_identity']) && !$navbar['is_identity']): ?>
+
+					<li class="nav-item<?= $header['active_item'] == 'login' ? ' active' : '' ?>">
+						<a class="nav-link" href="<?= $this->config->config['base_url'] ?>site/login">Войти<?= $header['active_item'] == 'login' ? '<span class="sr-only">(current)</span>' : '' ?></a>
+					</li><?php
+					else: ?>
+
+					<li class="nav-item">
+						<a class="nav-link" href="<?= $this->config->config['base_url'] ?>site/logout">Выйти<?= isset($navbar['username']) ? " ({$navbar['username']})" : '' ?></a>
+					</li><?php
+					endif;
+					?>
+
 				</ul>
 			</div>
 		</nav>
 	</div>
 </header>
-<div class="<?= !empty($content['class']) ? $content['class'] : '' ?> content py-2">
+<div class="<?= !empty($content['class']) ? $content['class'] : '' ?> content pt-2">
 	<nav aria-label="breadcrumb">
 		<ol class="breadcrumb mb-2"><?php /*Навигационная иерархия страницы*/
 		for ($i = 0; $i < count($breadcrumbs); $i++):
@@ -103,7 +117,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 <div id="butToTop">&#xE133;</div>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+<!-- <script src="<?= $this->config->config['base_url'] ?>assets/jquery/jquery.js" type="text/javascript"></script> -->
+<!-- <script src="<?= ''//$this->config->config['base_url'] ?>assets/bootstrap4/js/bootstrap.js" type="text/javascript"></script> -->
+<!-- <script src="<?= $this->config->config['base_url'] ?>assets/bootstrap4/js/bootstrap.bundle.js" type="text/javascript"></script> -->
 <script src="<?= $this->config->config['base_url'] ?>js/main.js" type="text/javascript"></script>
-<script>jQuery('[data-toggle="tooltip"]').tooltip();</script>
+<!-- <script>jQuery('[data-toggle="tooltip"]').tooltip();</script> -->
 </body>
 </html>

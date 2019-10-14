@@ -75,3 +75,4 @@ user_guide_src/cilexer/pycilexer.egg-info/*
 /application/admin/libraries/*
 /application/admin/logs
 /application/admin/logs/*
+/application/admin/models/db/SecurityUser.php

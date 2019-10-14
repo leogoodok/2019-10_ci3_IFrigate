@@ -2,9 +2,53 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Site extends CI_Controller {
+
   /**
-  * Формирует данные и отображает страницу "Отправки сообщения администратору".
+  * Перехватывает вызовы методов.
+  * Проверяет авторизацию пользователя по данным из session и/или cookie.
+  * Перенаправляет:
+  *   - "Гостей" на страницу авторизации;
+  *   - "Авторизованных пользователей" на страницу "Сообщений администратору"
   * @return mixed
+   */
+  public function _remap($method)
+  {
+    /**
+     * Подключение библиотек
+     */
+    $this->load->helper('cookie');
+
+
+    /**
+     * Подключение моделей
+     */
+    $this->load->model('User');
+
+
+    /**
+     * Проверка авторизации пользователя по данным из session и/или cookie.
+     * Перенаправление
+     */
+    if ($this->User->getIdentity()->isIdentity()) {
+      if ($method === 'logout') {
+        $this->User->logout();
+        $action = 'login';
+      } else if ($method !== 'login') {
+        $this->$method();
+        return;
+      } else {
+        $action = 'index';
+      }
+    } else {
+      $action = 'login';
+    }
+    $this->$action();
+  }
+
+
+  /**
+   * Формирует данные и отображает страницу "Сообщений администратору".
+   * @return mixed
    */
   public function index()
   {
@@ -18,6 +62,9 @@ class Site extends CI_Controller {
         'brandLabel' => 'Задание от ifrigate.ru (Backend)',
         'active_item' => 'message',
       ],
+      'navbar' => [
+        'is_identity' => false,
+      ],
       'breadcrumbs' => [
         [
           'link' => $this->config->config['base_url'],
@@ -28,7 +75,6 @@ class Site extends CI_Controller {
         ],
       ],
       'content' => [
-        // 'class' => 'container site-message',
         'class' => 'container-fluid site-message',
         'params' => [],
       ],
@@ -67,15 +113,35 @@ class Site extends CI_Controller {
     /**
      * Подключение библиотек
      */
+    $this->load->helper('cookie');
     $this->load->helper(array('form', 'url'));
     $this->load->library('pagination');
+
+
+    /**
+     * Подключение моделей
+     */
+    $this->load->model('User');
+
+
+    /**
+    * Проверка авторизации пользователя по данным из session и/или cookie.
+    */
+    if (!empty($identity = $this->User->getIdentity()) && $identity->isIdentity()) {
+      /**
+       * Получение статуса авторизации и Логина пользователя
+       */
+      $main['navbar']['is_identity'] = $identity->isIdentity();
+      $main['navbar']['username'] = $identity->getUsername();
+      unset($identity);
+    }
 
 
     /**
      * Подключение класса "TabMessage"
      */
     // load_class('TabMessage', 'models/db', '');
-    include_once realpath(__DIR__.'/../../models/db/TabMessage.php');
+    require_once realpath(__DIR__.'/../../models/db/TabMessage.php');
 
 
     /**
@@ -89,15 +155,15 @@ class Site extends CI_Controller {
      * Создание Пагинатора и запись в переменную
      */
     $config['base_url'] = $this->config->config['base_url'].'site/index';
+    // $config['total_rows'] = 200;//!!! из запросы БД - количество строк в таблице
     $config['total_rows'] = $main['content']['params']['total_count'];
     $config['per_page'] = 10;
-    $config['uri_segment'] = 3;//По умолчанию
-    $config['num_links'] = 2;//По умолчанию
+
+    $config['uri_segment'] = 3;
+    $config['num_links'] = 2;
     $config['reuse_query_string'] = true;
 
     //Настройки форматирования (перенести массив в файл, читать из него и объединять массивы)
-    // $config['full_tag_open'] = '<ul class="pagination justify-content-center">';
-    // $config['full_tag_close'] = '</ul>';
     $config['first_link'] = 1;
     $config['first_tag_open'] = "\n\t\t\t\t\t<li class=\"page-item\">\n\t\t\t\t\t\t";
     $config['first_tag_close'] = "\n\t\t\t\t\t</li>";
@@ -225,6 +291,7 @@ class Site extends CI_Controller {
     $query = $this->db->from(TabMessage::tableName())
     ->limit($main['content']['params']['page_size'], $main['content']['params']['begin'] - 1)
     ->order_by('id', 'ASC')->get();
+
     foreach ($query->result('TabMessage') as $row) {
       $main['content']['data'][] = $row;
     }
@@ -237,5 +304,206 @@ class Site extends CI_Controller {
      */
     $main['content']['body'] = $this->load->view('message', $main, true);
     $this->load->view('layouts/main', $main);
+  }
+
+
+  /**
+   * Формирует данные и отображает страницу "Сообщений администратору".
+   * @return mixed
+   */
+  public function login()
+  {
+    /**
+     * Подключение конфигурации Google reCAPTCHA
+     */
+//     $reCaptcha = require realpath(__DIR__.'/../../config/GoogleReCaptcha.php');
+
+
+    /**
+     * Массив настроек Представлений и контент страницы вставляемый в шаблон
+     */
+    $main = [
+      'title' => 'Авторизация',
+      'header' => [
+        'class' => 'bg-dark',
+        'brandLabel' => 'Задание от ifrigate.ru (Backend)',
+        'active_item' => 'login',
+      ],
+      'navbar' => [
+        'is_identity' => false,
+      ],
+      'breadcrumbs' => [
+        [
+          'link' => $this->config->config['base_url'],
+          'name' => 'Главная',
+        ],
+        [
+          'active' => true,
+        ],
+      ],
+      'content' => [
+        'class' => 'container site-message',
+        'params' => [
+          'min_length' => 3,
+          'max_length' => 100,
+        ],
+        // 'captcha' => [
+        //   'public_key' => $reCaptcha['v2_checkbox']['public_key'],
+        //   'is_valid' => null,
+        //   'error_msg' => '',
+        // ],
+      ],
+      'footer' => [
+        'class' => 'bg-dark',
+        'link_github' => 'https://github.com/leogoodok/ci3_IFrigate',
+      ],
+    ];
+
+
+    /**
+     * Подключение библиотек
+     */
+    $this->load->helper('cookie');
+    $this->load->helper(array('form', 'url'));
+    $this->load->library('form_validation');
+    $this->load->library('pagination');
+
+
+    /**
+     * Подключение моделей
+     */
+    $this->load->model('User');
+
+
+    /**
+     * Настройка и установка правил валидации.
+     *
+     * // WARNING: !!! Перенести в файл конфигурации !!!
+     */
+    $config_valid = [
+      [
+        'field' => "SiteLoginForm[username]",
+        'label' => 'Ваш Логин',
+        'rules' => [
+          'trim',
+          'required',
+          "min_length[{$main['content']['params']['min_length']}]",
+          "max_length[{$main['content']['params']['max_length']}]",
+        ],
+        'errors' => [
+          'required' => 'Пожалуйста, заполните поле',
+          'min_length' => "Не менее {$main['content']['params']['min_length']} символов",
+          'max_length' => "Не более {$main['content']['params']['max_length']} символов",
+        ],
+      ],
+      [
+        'field' => "SiteLoginForm[password]",
+        'label' => 'Пароль',
+        'rules' => [
+          'trim',
+          'required',
+          'alpha_numeric',
+          "min_length[{$main['content']['params']['min_length']}]",
+          "max_length[{$main['content']['params']['max_length']}]",
+        ],
+        'errors' => [
+          'required' => 'Пожалуйста, заполните поле',
+          'alpha_numeric' => 'Допускается только алфавитно-цифровые символы',
+          'min_length' => "Не менее {$main['content']['params']['min_length']} символов",
+          'max_length' => "Не более {$main['content']['params']['max_length']} символов",
+        ],
+      ],
+      // [
+      //   'field' => "g-recaptcha-response",
+      //   'rules' => [
+      //     'required',
+      //   ],
+      //   'errors' => [
+      //     'required' => 'Пожалуйста, пройдите проверку',
+      //   ],
+      // ],
+    ];
+    $this->form_validation->set_rules($config_valid);
+
+
+    /**
+     * Получение POST-данных. Валидация.
+     * Проверка корректности и актуальности кода Капчи
+     */
+    if (($main['validation']['status'] = $this->form_validation->run()) == true) {
+      $post = $this->input->post();
+
+      /**
+       * Проверка reCAPTCHA
+       */
+      //...
+//       require_once realpath(__DIR__.'/../../models/ReCaptcha.php');
+// //       load_class('ReCaptcha', 'models', '');
+//       $out = (new ReCaptcha())->verifyUserResponse($reCaptcha['v2_checkbox']['secret_key'], $post['g-recaptcha-response'], $post['g-recaptcha-user-ip']);
+
+
+//       if ($out['status'] == 'ok' && isset($out['response']['success']) && $out['response']['success']) {
+        /**
+         * Успешная верификация каптчи
+         */
+//         $main['content']['captcha']['is_valid'] = true;
+//         $main['content']['captcha']['error_msg'] = '';
+
+
+      /**
+       * Авторизация пользователя по Логину, Паролю
+       */
+      if ($is_identity = $this->User->loginUserByName($post['SiteLoginForm']['username'], $post['SiteLoginForm']['password'], $post['SiteLoginForm']['rememberMe'])) {
+        /**
+         * Успешная авторизация!
+         * Переадресация на страницу "index"
+         */
+        redirect($this->config->config['base_url'].'site/index', 'refresh');
+      }
+
+
+      /**
+       * Ошибка авторизации!
+       * Запись сообщения в сессию.
+       * Перезагрузка страницы, для сброса POST-параметров.
+       */
+      $this->session->set_flashdata($main['header']['active_item'], [['danger' => 'Отказ в авторизации: Неправильное имя пользователя или пароль.']]);
+      redirect($this->config->config['base_url'].'site/login', 'refresh');
+
+
+
+      // } else {
+      //   /**
+      //    * Ошибка верификации каптчи
+      //    */
+      //   $main['content']['captcha']['is_valid'] = false;
+      //   $captcha_error = '';
+      //   if (isset($out['response']['error-codes'])) {
+      //     if (is_array($out['response']['error-codes'])) {
+      //       $captcha_error = [];
+      //       foreach ($out['response']['error-codes'] as $code) {
+      //         $description = ReCaptcha::getErrorsDescription($code);
+      //         if (isset($description)) {
+      //           $captcha_error[] = $description;
+      //         }
+      //       }
+      //     } else {
+      //       $captcha_error = $out['response']['error-codes'];
+      //     }
+      //   }
+      //   $main['content']['captcha']['error_msg'] = is_array($captcha_error) ? "<div>".implode("</div>\n<div>", $captcha_error)."</div>" : $captcha_error;
+      //   $this->session->set_flashdata($main['header']['active_item'], [['danger' => 'Произошла ошибка при проверке "Я не робот!"']]);
+      //
+      //
+      // }
+    }
+
+
+     /**
+      * Редеринг представления "login" в переменную
+      * Редеринг заполненного "основного шаблона страницы"
+      */
+     $main['content']['body'] = $this->load->view('login', $main, true);
+     $this->load->view('layouts/main', $main);
   }
 }

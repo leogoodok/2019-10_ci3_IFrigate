@@ -162,14 +162,16 @@ class Site extends CI_Controller {
      * NOTE: Для отправки формы с перезагрузкой страницы.
      */
     if (($main['validation']['status'] = $this->form_validation->run()) == true) {
-       $post = $this->input->post();
+      $post = $this->input->post();
 
 
       /**
        * Проверка reCAPTCHA
        */
-      require_once realpath(__DIR__.'/../models/ReCaptcha.php');
+      load_class('ReCaptcha', 'models', '');
       $out = (new ReCaptcha())->verifyUserResponse($reCaptcha['v2_checkbox']['secret_key'], $post['g-recaptcha-response'], $post['g-recaptcha-user-ip']);
+
+
       if ($out['status'] == 'ok' && isset($out['response']['success']) && $out['response']['success']) {
         /**
          * Успешная верификация каптчи
@@ -186,8 +188,11 @@ class Site extends CI_Controller {
         $tab_message->status = 1;
         $tab_message->name = $post['SiteMessageForm']['name'];
         $tab_message->email = $post['SiteMessageForm']['email'];
-        $tab_message->created_at = time();
 
+        if (!empty($post['SiteMessageForm']['files'])) {
+          $tab_message->number_attachment = count($post['SiteMessageForm']['files']);//!!!! ?????????
+        }
+        $tab_message->created_at = time();
 
         /**
          * Формирование Email сообщения администратору
@@ -289,7 +294,6 @@ class Site extends CI_Controller {
           'required',
           "min_length[3]",
           "max_length[100]",
-          // 'is_unique[users.username]'
         ],
         'errors' => [
           'required' => '- "Ваше Имя"',
@@ -349,7 +353,6 @@ class Site extends CI_Controller {
      *
      * NOTE: Для отправки формы без перезагрузки страницы.
      */
-    // if (($main['validation']['status'] = $this->form_validation->run()) == true) {
     if ($this->form_validation->run() == true) {
       $post = $this->input->post();
 
@@ -357,7 +360,7 @@ class Site extends CI_Controller {
       /**
        * Проверка reCAPTCHA
        */
-      require_once realpath(__DIR__.'/../models/ReCaptcha.php');
+      load_class('ReCaptcha', 'models', '');
       $out = (new ReCaptcha())->verifyUserResponse($reCaptcha['v2_checkbox']['secret_key'], $post['g-recaptcha-response'], $post['g-recaptcha-user-ip']);
       if ($out['status'] == 'ok' && isset($out['response']['success']) && $out['response']['success']) {
         /**
