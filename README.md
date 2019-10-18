@@ -27,6 +27,13 @@ Backend  - http://ci3ifrigate.wotskill.ru/admin/
 
 Ход выполнения см. в README_GitHub.md
 
+Пользователь для авторизации.
+
+Логин: wotskill
+
+Пароль: x6Aj5bQ7xw
+
+
 ## Структура приложения
 
 ### FRONTEND часть
